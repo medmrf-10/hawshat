@@ -53,6 +53,7 @@ body>main{flex:1;min-height:0}
 .csub .chip.on{border-color:var(--acc);color:var(--acc)}
 .stage .ph .w.d-x{border-bottom:1px dotted #d97a4a}
 .stage .ph .w.d-f{border-bottom:1px dotted #7d8ba0}
+.stage .ph .w.d-n{border-bottom:1px dotted #c9a227}
 .srcbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 12px;margin-top:8px;font-size:.73rem;color:var(--dim);line-height:1.85;text-align:center}
 .srcbar b{color:var(--txt);font-weight:700}
 .srcbar .k{display:inline-flex;align-items:center;gap:4px}
@@ -106,9 +107,19 @@ function wcls(w,old){
     if(c===1||c===2)return ' d-f';
     return '';
   }
-  return w[5]==='x'?' d-x':'';
+  if(w[5]==='x')return ' d-x';
+  if(w[5]==='n')return ' d-n';
+  return '';
 }
 function buildPhrases2(src){return RAWPH?normAlign(src).map(w=>[w]):buildPhrases(normAlign(src))}
+let OLDEST=0;                       // عدد الكلمات «المقدَّرة» (بلا زمن صوتي حقيقي) في المحاذاة القديمة
+function expandCls(aln){            // xe = [[بداية, عدد], ...] تتابعات الكلمات المقدَّرة
+  if(!aln||!aln.xe||!aln.w)return aln;
+  const w=aln.w;let t=0;
+  for(const r of aln.xe){const a=r[0],c=r[1];
+    for(let i=a;i<a+c&&i<w.length;i++){const x=w[i];if(x.length<5)x.push(0);x[4]=-1;t++;}}
+  OLDEST=t;return aln;
+}
 function srcLabel(){return SRC==='force'?'الطريقة: القسرية ✓':'الطريقة: القديمة'}
 function pct(x){return x==null?'—':(x*100).toFixed(1)+'%'}
 function srcInfo(){
@@ -120,11 +131,12 @@ function srcInfo(){
       +'<span class="k">صارم '+pct(m.strict)+'</span>'
       +'<span class="k">غير موضوعة '+pct((m.fallback||0)/tot)+'</span>'
       +'<span class="k">نوافذ '+(m.windows!=null?m.windows:'—')+'</span>'
+      +((m.near_promoted||0)>0?'<span class="k" style="border-bottom:1px dotted #c9a227">مطابقة مجاورة '+pct((m.near_promoted||0)/tot)+'</span>':'')
       +'<span class="k"><i></i> بلا زمن صوتي</span>';
   }else{
     const c=m.old_class||{};
     h+='<span class="k">تغطية '+pct(m.old_cov)+'</span>'
-      +'<span class="k"><i></i> مقدّرة خطّياً '+(c['-1']!=null?(c['-1']||0):'—')+'</span>'
+      +'<span class="k"><i></i> مقدّرة خطّياً '+(c['-1']!=null?(c['-1']||0):(OLDEST||'—'))+'</span>'
       +'<span class="k">إنقاذ حرفي '+(c['3']||0)+'</span>'
       +'<span class="k">مطابقة تقريبية '+((c['1']||0)+(c['2']||0))+'</span>'
       +'<span class="k">مراسي تامة '+(c['0']||0)+'</span>';
@@ -344,6 +356,7 @@ document.addEventListener('keydown',e=>{
     if(prev)navigator.mediaSession.setActionHandler('previoustrack',()=>location.href='lesson.html?s='+encodeURIComponent(slug)+'&l='+prev.n);
     if(next)navigator.mediaSession.setActionHandler('nexttrack',()=>location.href='lesson.html?s='+encodeURIComponent(slug)+'&l='+next.n);
   }catch(e){}
+  expandCls(aln);                     // توسيع تصنيف الكلمات المضغوط (xe) إلى w[4] لكل كلمة
   ALOLD=aln||null;ALFORCE=al2||null;
   if(SRC==='force'&&ALFORCE)AL=ALFORCE;else{SRC='old';AL=ALOLD}
   if(AL){
