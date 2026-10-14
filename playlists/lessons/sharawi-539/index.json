@@ -1,1 +1,184 @@
-{"af":{"3":"03.align.json","4":"04.align.json","5":"05.align.json","2":"02.align.json","1":"01.align.json"},"af_large":{"1":"01.align.large.json","2":"02.align.large.json"},"tf":{"14":"14.txt","15":"15.txt","7":"07.txt","13":"13.txt","4":"04.txt","12":"12.txt","3":"03.txt","6":"06.txt","11":"11.txt","1":"01.txt","9":"09.txt","10":"10.txt","5":"05.txt","8":"08.txt","2":"02.txt"},"align":[1,2,3,4,5],"alignOk":[1,2,3,4,5],"txt":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],"sum":[],"sumf":{},"qu":[],"quf":{},"models":{"primary":"whisper-large-v3-turbo-q4","large":"whisper-large-v3-mlx-8bit"}}
+{
+ "af": {
+  "1": "01.align.json",
+  "2": "02.align.json",
+  "3": "03.align.json",
+  "4": "04.align.json",
+  "5": "05.align.json"
+ },
+ "af_large": {
+  "1": "01.align.large.json",
+  "2": "02.align.large.json"
+ },
+ "af2": {
+  "1": "01.align.force.json",
+  "2": "02.align.force.json",
+  "3": "03.align.force.json",
+  "4": "04.align.force.json"
+ },
+ "afm": {
+  "1": {
+   "cov": 0.953,
+   "acoustic": 2654,
+   "strict": 0.695,
+   "fallback": 130,
+   "chunks": 91,
+   "windows": 91,
+   "model": "large-v3-8bit",
+   "prob": 0.668,
+   "elapsed": 226.1,
+   "old_cov": 0.846,
+   "old_class": {
+    "-1": 394,
+    "0": 1698,
+    "1": 181,
+    "2": 15,
+    "3": 496
+   }
+  },
+  "2": {
+   "cov": 0.876,
+   "acoustic": 2823,
+   "strict": 0.586,
+   "fallback": 399,
+   "chunks": 99,
+   "windows": 101,
+   "model": "large-v3-8bit",
+   "prob": 0.611,
+   "elapsed": 222.9,
+   "old_cov": 0.817,
+   "old_class": {
+    "-1": 641,
+    "0": 1636,
+    "1": 269,
+    "2": 10,
+    "3": 666
+   }
+  },
+  "3": {
+   "cov": 0.871,
+   "acoustic": 2741,
+   "strict": 0.541,
+   "fallback": 407,
+   "chunks": 114,
+   "windows": 114,
+   "model": "large-v3-8bit",
+   "prob": 0.568,
+   "elapsed": 237.9,
+   "old_cov": 0.784,
+   "old_class": {
+    "-1": 778,
+    "0": 1420,
+    "1": 229,
+    "2": 16,
+    "3": 705
+   }
+  },
+  "4": {
+   "cov": 0.872,
+   "acoustic": 2935,
+   "strict": 0.565,
+   "fallback": 431,
+   "chunks": 109,
+   "windows": 110,
+   "model": "large-v3-8bit",
+   "prob": 0.601,
+   "elapsed": 262.9,
+   "old_cov": 0.753,
+   "old_class": {
+    "-1": 881,
+    "0": 1525,
+    "1": 221,
+    "2": 16,
+    "3": 723
+   }
+  }
+ },
+ "cls": {
+  "1": {
+   "-1": 394,
+   "0": 1698,
+   "1": 181,
+   "2": 15,
+   "3": 496
+  },
+  "2": {
+   "-1": 641,
+   "0": 1636,
+   "1": 269,
+   "2": 10,
+   "3": 666
+  },
+  "3": {
+   "-1": 778,
+   "0": 1420,
+   "1": 229,
+   "2": 16,
+   "3": 705
+  },
+  "4": {
+   "-1": 881,
+   "0": 1525,
+   "1": 221,
+   "2": 16,
+   "3": 723
+  }
+ },
+ "tf": {
+  "1": "01.txt",
+  "2": "02.txt",
+  "3": "03.txt",
+  "4": "04.txt",
+  "5": "05.txt",
+  "6": "06.txt",
+  "7": "07.txt",
+  "8": "08.txt",
+  "9": "09.txt",
+  "10": "10.txt",
+  "11": "11.txt",
+  "12": "12.txt",
+  "13": "13.txt",
+  "14": "14.txt",
+  "15": "15.txt"
+ },
+ "align": [
+  1,
+  2,
+  3,
+  4,
+  5
+ ],
+ "alignOk": [
+  1,
+  2,
+  3,
+  4,
+  5
+ ],
+ "txt": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15
+ ],
+ "sum": [],
+ "sumf": {},
+ "qu": [],
+ "quf": {},
+ "models": {
+  "primary": "whisper-large-v3-turbo-q4",
+  "large": "whisper-large-v3-mlx-8bit",
+  "force": "whisper-large-v3-mlx-8bit (محاذاة قسرية: find_alignment على النصّ الأصلي)"
+ }
+}

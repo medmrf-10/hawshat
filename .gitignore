@@ -4,3 +4,7 @@ __pycache__/
 *.pyc
 *.wwords.json
 _site/
+
+# ملفّات عمل الجلسة (غير منشورة)
+.hermes/
+_fix/

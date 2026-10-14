@@ -51,6 +51,12 @@ body>main{flex:1;min-height:0}
 .csub .pos{flex:1;min-width:0;text-align:center;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .csub .chip{flex:none;min-height:44px;min-width:48px;justify-content:center;padding:0 10px;border-radius:99px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:.78rem;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
 .csub .chip.on{border-color:var(--acc);color:var(--acc)}
+.stage .ph .w.d-x{border-bottom:1px dotted #d97a4a}
+.stage .ph .w.d-f{border-bottom:1px dotted #7d8ba0}
+.srcbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 12px;margin-top:8px;font-size:.73rem;color:var(--dim);line-height:1.85;text-align:center}
+.srcbar b{color:var(--txt);font-weight:700}
+.srcbar .k{display:inline-flex;align-items:center;gap:4px}
+.srcbar .k i{width:14px;border-bottom:1px dotted #d97a4a;display:inline-block}
 .nav{display:none}
 .txt{flex:1;min-height:0;overflow-y:auto;background:linear-gradient(145deg,var(--card),var(--card2));border:1px solid var(--border);border-radius:var(--r-md);padding:18px;margin-top:8px;font-family:var(--font-ar);font-size:1.08rem;line-height:2.1;white-space:pre-wrap}
 .cover{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:linear-gradient(145deg,var(--card),var(--card2));cursor:pointer}
@@ -78,16 +84,65 @@ const icS='<svg class="i" style="width:1em;height:1em;vertical-align:-.12em"><us
 
 let YTP=null,AL=null,PH=[],curPh=-1,curW=-1,timer=null,pendPlay=false;
 let WLOCK=null,SLEEP=null,SPANS=[],lastSave=0;
+let ALOLD=null,ALFORCE=null,AFM=null,SRC='old';   // مصدر المحاذاة المعروض: قديمة / قسرية صوتية
 
-/* normalize alignment shapes to [[word,s,e,seg],...] then group into
+/* normalize alignment shapes to [[word,s,e,seg,sc,src],...] then group into
    display phrases by punctuation / seg id / max length */
 function normAlign(al){
   let ws = Array.isArray(al) ? al : (al && al.w) || [];
   return ws.map(x=>{
-    if(Array.isArray(x))return x;
-    return [x.w||x.t,x.s,x.e,x.seg||0];
+    if(Array.isArray(x))return [x[0],x[1],x[2],x[3]||0,x[4],x[5]];
+    return [x.w||x.t,x.s,x.e,x.seg||0,(x.sc===undefined?null:x.sc),(x.src||null)];
   });
 }
+/* علامة الكلمة بحسب الطريقة المعروضة:
+   القديمة: sc=-1 تقدير خطّي أو sc=3 إنقاذ حرفي → خطّ منقّط برتقالي · sc=1/2 مطابقة تقريبية → رمادي
+   القسرية: src='x' = كلمة لم يضعها المحاذي زمناً صوتياً → خطّ منقّط برتقالي */
+function wcls(w,old){
+  if(old){
+    const c=w[4];
+    if(c===null||c===undefined)return '';
+    if(c===-1||c===3)return ' d-x';
+    if(c===1||c===2)return ' d-f';
+    return '';
+  }
+  return w[5]==='x'?' d-x':'';
+}
+function buildPhrases2(src){return RAWPH?normAlign(src).map(w=>[w]):buildPhrases(normAlign(src))}
+function srcLabel(){return SRC==='force'?'الطريقة: القسرية ✓':'الطريقة: القديمة'}
+function pct(x){return x==null?'—':(x*100).toFixed(1)+'%'}
+function srcInfo(){
+  const m=AFM||{};
+  const tot=Math.max(1,(m.acoustic||0)+(m.fallback||0));
+  let h='<b>'+srcLabel()+'</b>';
+  if(SRC==='force'){
+    h+='<span class="k">زمن صوتي حقيقي '+pct((m.acoustic||0)/tot)+'</span>'
+      +'<span class="k">صارم '+pct(m.strict)+'</span>'
+      +'<span class="k">غير موضوعة '+pct((m.fallback||0)/tot)+'</span>'
+      +'<span class="k">نوافذ '+(m.windows!=null?m.windows:'—')+'</span>'
+      +'<span class="k"><i></i> بلا زمن صوتي</span>';
+  }else{
+    const c=m.old_class||{};
+    h+='<span class="k">تغطية '+pct(m.old_cov)+'</span>'
+      +'<span class="k"><i></i> مقدّرة خطّياً '+(c['-1']!=null?(c['-1']||0):'—')+'</span>'
+      +'<span class="k">إنقاذ حرفي '+(c['3']||0)+'</span>'
+      +'<span class="k">مطابقة تقريبية '+((c['1']||0)+(c['2']||0))+'</span>'
+      +'<span class="k">مراسي تامة '+(c['0']||0)+'</span>';
+  }
+  return h;
+}
+function setSrc(m){
+  if(m==='force'&&!ALFORCE)return;
+  SRC=m;try{localStorage.setItem('alsrc',m)}catch(e){}
+  const src=(m==='force'?ALFORCE:ALOLD)||ALOLD;
+  if(!src)return;
+  AL=src;PH=buildPhrases2(src);curPh=-1;curW=-1;
+  const b=document.getElementById('srctog');
+  if(b){b.textContent=srcLabel();b.classList.toggle('on',m==='force')}
+  const sb=document.getElementById('srcbar');if(sb)sb.innerHTML=srcInfo();
+  if(timer)tick();else renderPhrase(0);
+}
+function toggleSrc(){setSrc(SRC==='old'?'force':'old')}
 const PBRK=/[،؛.!؟:…—]$/;
 function buildPhrases(ws){
   const ph=[];let cur=[],last=-1;
@@ -105,7 +160,7 @@ function renderPhrase(i){
   const pos=document.getElementById('pos');
   if(i<0||i>=PH.length)return;
   curPh=i;curW=-1;
-  let h='<div class="ph">'+PH[i].map((w,k)=>'<span class="w" data-s="'+w[1]+'">'+esc(w[0])+'</span>').join(' ')+'</div>';
+  let h='<div class="ph">'+PH[i].map((w,k)=>'<span class="w'+wcls(w,SRC!=='force')+'" data-s="'+w[1]+'">'+esc(w[0])+'</span>').join(' ')+'</div>';
   if(TELE){
     const pv=i>0?PH[i-1].map(w=>w[0]).join(' '):'';
     const nx=i<PH.length-1?PH[i+1].map(w=>w[0]).join(' '):'';
@@ -246,6 +301,10 @@ document.addEventListener('keydown',e=>{
   const afn=hasMap?lidx.af[ln]:null;
   const tfn=lidx&&lidx.tf?lidx.tf[ln]:null;
   let aln=afn?await j('lessons/'+encodeURIComponent(slug)+'/'+afn):null;
+  const a2n=lidx&&lidx.af2?lidx.af2[ln]:null;              // المحاذاة القسرية الصوتية (الجديدة)
+  let al2=a2n?await j('lessons/'+encodeURIComponent(slug)+'/'+a2n):null;
+  if(al2){const w2=Array.isArray(al2)?al2:(al2&&al2.w)||[];if(!w2.length)al2=null}
+  AFM=(lidx&&lidx.afm?lidx.afm[ln]:null)||null;
   if(!aln&&!hasMap){ // no file map → probe both pads
     aln=await j('lessons/'+encodeURIComponent(slug)+'/'+ln3+'.align.json');
     if(!aln&&ln3!==ln2)aln=await j('lessons/'+encodeURIComponent(slug)+'/'+ln2+'.align.json');
@@ -285,12 +344,14 @@ document.addEventListener('keydown',e=>{
     if(prev)navigator.mediaSession.setActionHandler('previoustrack',()=>location.href='lesson.html?s='+encodeURIComponent(slug)+'&l='+prev.n);
     if(next)navigator.mediaSession.setActionHandler('nexttrack',()=>location.href='lesson.html?s='+encodeURIComponent(slug)+'&l='+next.n);
   }catch(e){}
-  if(aln){
-    AL=aln;PH=RAWPH?normAlign(aln).map(w=>[w]):buildPhrases(normAlign(aln));
-    if(!PH.length){aln=null;PH=[]} // empty phrases → plain-text path
+  ALOLD=aln||null;ALFORCE=al2||null;
+  if(SRC==='force'&&ALFORCE)AL=ALFORCE;else{SRC='old';AL=ALOLD}
+  if(AL){
+    PH=buildPhrases2(AL);
+    if(!PH.length){aln=null;AL=null;PH=[]} // empty phrases → plain-text path
   }
   const alcov=aln&&!Array.isArray(aln)?(aln.cov||0):1;
-  if(alcov<0.3)aln=null;  // below the site-wide listenable threshold → text lesson
+  if(alcov<0.3){aln=null;AL=null}  // below the site-wide listenable threshold → text lesson
   const hasText=!!(tfn||rrow);
   const du=(l.dur&&fmtDur(l.dur))||'';
   const I=i=>'<svg class="i"><use href="icons.svg?v=12#'+i+'"/></svg>';
@@ -307,7 +368,9 @@ document.addEventListener('keydown',e=>{
       +'<div class="csub"><span class="tm" id="tm">0:00</span><span class="pos" id="pos"></span>'
       +'<button class="chip" id="spd" title="سرعة التشغيل" onclick="cycleSpeed()">×'+(store.get('speed')||1)+'</button>'
       +'<button class="chip'+(TELE?' on':'')+'" id="t-tele" title="وضع الملقّن" onclick="TELE=!TELE;store.set(\'tele\',TELE?1:0);this.classList.toggle(\'on\',TELE);renderPhrase(Math.max(0,curPh))">ملقّن</button>'
-      +'</div></div>';
+      +(ALFORCE?'<button class="chip'+(SRC==='force'?' on':'')+'" id="srctog" title="التبديل بين الطريقة القديمة (ASR + مطابقة + تقدير) والمحاذاة الصوتية القسرية للنصّ الأصلي" onclick="toggleSrc()">'+srcLabel()+'</button>':'')
+      +'</div></div>'
+      +(ALFORCE?'<div class="srcbar" id="srcbar">'+srcInfo()+'</div>':'');
   }else{
     if(l.video)h+='<div class="player" id="pl"><div class="cover" id="cvr"><span class="big">▶</span><span>تشغيل الدرس من يوتيوب</span></div></div>';
     h+='<div class="tools" style="display:flex;gap:8px;margin-top:10px"><button id="fmi" aria-label="تصغير الخط" style="width:44px;height:44px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:1rem;cursor:pointer">A−</button>'
@@ -330,8 +393,11 @@ document.addEventListener('keydown',e=>{
     f.setAttribute('allow','autoplay; encrypted-media; picture-in-picture; fullscreen');f.setAttribute('allowfullscreen','');
     cvr.parentElement.replaceChild(f,cvr)};
   if(aln){
+    AL=SRC==='force'&&ALFORCE?ALFORCE:ALOLD;PH=buildPhrases2(AL);
     renderPhrase(phraseAt(T0||resumePos()));   // first phrase visible before the player loads
     const st=document.getElementById('stage');if(st)st.classList.add('idle');
+    const sb=document.getElementById('srcbar');if(sb)sb.innerHTML=srcInfo();
+    const tb=document.getElementById('srctog');if(tb){tb.textContent=srcLabel();tb.classList.toggle('on',SRC==='force')}
     mountPlayer(l.video);
   }
 })();
