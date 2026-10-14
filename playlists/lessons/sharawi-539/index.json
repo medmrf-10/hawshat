@@ -14,7 +14,8 @@
   "1": "01.align.force.json",
   "2": "02.align.force.json",
   "3": "03.align.force.json",
-  "4": "04.align.force.json"
+  "4": "04.align.force.json",
+  "5": "05.align.force.json"
  },
  "afm": {
   "1": {
@@ -92,6 +93,19 @@
     "2": 16,
     "3": 723
    }
+  },
+  "5": {
+   "cov": 0.664,
+   "acoustic": 2062,
+   "strict": 0.367,
+   "fallback": 1042,
+   "chunks": 116,
+   "windows": 116,
+   "model": "large-v3-8bit",
+   "prob": 0.529,
+   "elapsed": 227.4,
+   "old_cov": 0.748,
+   "old_class": null
   }
  },
  "cls": {

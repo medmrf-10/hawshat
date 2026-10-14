@@ -60,7 +60,7 @@
    "video": "k27ANM6OzlQ",
    "align": true,
    "cov": 0.748,
-   "cov_force": null,
+   "cov_force": 0.664,
    "cov_large": null,
    "chars": 18244,
    "words": 3104,
