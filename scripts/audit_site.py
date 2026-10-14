@@ -124,7 +124,10 @@ for slug, s in st.items():
                         if not text_resolves(n):
                             fails.append('%s/%s: alignOk lesson %s has no resolvable text' % (slug, rid, n))
                     good = 0
-                    for nk, fn in af.items():
+                    af_all = dict(af)
+                    for nk, fn in (li.get('af2') or {}).items():   # المحاذاة القسرية تُحتسب محاذاة
+                        af_all.setdefault(nk, fn)
+                    for nk, fn in af_all.items():
                         ap = os.path.join(ldir, fn)
                         if not os.path.exists(ap):
                             continue
