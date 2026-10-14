@@ -129,7 +129,7 @@ function srcInfo(){
   if(SRC==='force'){
     h+='<span class="k">زمن صوتي حقيقي '+pct((m.acoustic||0)/tot)+'</span>'
       +'<span class="k">صارم '+pct(m.strict)+'</span>'
-      +'<span class="k">غير موضوعة '+pct((m.fallback||0)/tot)+'</span>'
+      +'<span class="k">غير موضوعة '+pct((m.fallback_left!=null?m.fallback_left:(m.fallback||0))/tot)+'</span>'
       +'<span class="k">نوافذ '+(m.windows!=null?m.windows:'—')+'</span>'
       +((m.near_promoted||0)>0?'<span class="k" style="border-bottom:1px dotted #c9a227">مطابقة مجاورة '+pct((m.near_promoted||0)/tot)+'</span>':'')
       +'<span class="k"><i></i> بلا زمن صوتي</span>';
